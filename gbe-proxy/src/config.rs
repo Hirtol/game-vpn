@@ -53,7 +53,7 @@ pub fn overwrite_config(directory: impl AsRef<Path>) -> eyre::Result<Config> {
     let path = directory.as_ref().join(CONFIG_FILE_NAME);
     let mut file = std::fs::File::create(path)?;
     serde_json::to_writer_pretty(&mut file, &default_conf)?;
-    
+
     Ok(default_conf)
 }
 

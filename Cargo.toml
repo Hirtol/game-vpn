@@ -13,7 +13,7 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter", "fmt", "std
 papaya = "0.1.3"
 quinn = "0.11.5"
 rustls = { version = "0.23.14", features = ["ring"] }
-gbe-proxy-common = {path = "gbe-proxy-common"}
+gbe-proxy-common = { path = "gbe-proxy-common" }
 
 
 # Build dependencies with full release optimizations in debug builds since they'll rarely change

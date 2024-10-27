@@ -15,19 +15,16 @@ jobs:
         config:
           - {
             os: ubuntu-20.04,
-            toolchain: stable,
             target: x86_64-unknown-linux-musl,
             cross: true,
           }
           - {
             os: ubuntu-20.04,
-            toolchain: stable,
             target: aarch64-unknown-linux-gnu,
             cross: true,
           }
           - {
             os: ubuntu-20.04,
-            toolchain: stable,
             target: armv7-unknown-linux-gnueabihf,
             cross: true,
           }
@@ -35,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
 
       - name: Cache Dependencies
         uses: Swatinem/rust-cache@v2
