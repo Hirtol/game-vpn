@@ -1,5 +1,5 @@
 [package]
-name = "gbe-proxy-version"
+name = "gbe-proxy-dll"
 version = "0.1.0"
 edition = "2021"
 
