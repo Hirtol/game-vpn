@@ -69,10 +69,6 @@ impl ClientHandle {
                     tracing::debug!(?from, "Sending broadcast to all clients");
                     for (fictive_ip, client) in &clients {
                         // Sender also needs to receive it
-                        // if *fictive_ip == self.fictional_ip {
-                        //     continue;
-                        // }
-                        
                         let response = S2CHeader {
                             msg_type: S2CMessage::PassBroadcast {
                                 from,
