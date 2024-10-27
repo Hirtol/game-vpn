@@ -2,7 +2,6 @@ use std::fmt::Debug;
 use std::net::Ipv4Addr;
 pub use bincode;
 use quinn::{RecvStream, SendStream};
-use windows_sys::Win32::Networking::WinSock::{AF_INET, SOCKADDR_IN};
 use crate::subnet::is_fictive;
 
 pub mod subnet;
@@ -16,13 +15,6 @@ pub struct SocketAddrEncodable {
 }
 
 impl SocketAddrEncodable {
-    /// Write self to the network-byte order SOCKADDR_IN
-    pub fn write_to_sock_addr(&self, addr: &mut SOCKADDR_IN) {
-        addr.sin_port = self.port_be();
-        addr.sin_addr.S_un.S_addr = self.ip_le_u32();
-        addr.sin_family = AF_INET
-    }
-
     /// Return the Big Endian format of the port, as the windows APIs expect that
     pub fn port_be(&self) -> u16 {
         self.port.rotate_left(8)

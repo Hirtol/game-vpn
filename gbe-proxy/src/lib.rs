@@ -41,10 +41,10 @@ pub fn dll_critical_setup(_hinst_dll: windows::Win32::Foundation::HMODULE) -> ey
 /// Executed after `dll_critical_setup`, in a separate thread.
 pub fn dll_attach(hinst_dll: windows::Win32::Foundation::HMODULE, app: Application) -> eyre::Result<()> {
     let dll_path = rust_hooking_utils::get_current_dll_path(hinst_dll)?;
-    
+
     let config_directory = dll_path.parent().context("DLL is in root")?;
     config::create_initial_config(config_directory)?;
-    
+
     let config = config::load_config(config_directory)?;
     if config.debug.console {
         unsafe {
@@ -52,13 +52,13 @@ pub fn dll_attach(hinst_dll: windows::Win32::Foundation::HMODULE, app: Applicati
             let _ = ansi_term::enable_ansi_support();
         }
     }
-    
+
     let root_dir = config.debug.file_log.then_some(dll_path.parent().context("DLL is in root")?);
     trace::create_subscriber("WARN,gbe_proxy=TRACE,gbe_proxy_common=TRACE", root_dir)?;
     let _ = rustls::crypto::ring::default_provider().install_default();
-    
+
     tracing::info!("Attempting to connect to server at: {config:#?}");
-    
+
     app.rt.block_on(async move {
         let ClientState::Dormant(dormant_state) = &**app.client.load() else {
             unreachable!("The client can't already be initialised!")

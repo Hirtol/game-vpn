@@ -6,7 +6,7 @@ use std::{
 };
 use std::sync::OnceLock;
 use arc_swap::ArcSwap;
-use windows_sys::Win32::Networking::WinSock::{FIONREAD, IN_ADDR, IPPROTO_TCP, IPPROTO_UDP, SEND_RECV_FLAGS, SOCKADDR, SOCKADDR_IN, SOCKET, SOCKET_ERROR, SO_BROADCAST, WINSOCK_SHUTDOWN_HOW, WINSOCK_SOCKET_TYPE};
+use windows_sys::Win32::Networking::WinSock::{AF_INET, FIONREAD, IN_ADDR, IPPROTO_TCP, IPPROTO_UDP, SEND_RECV_FLAGS, SOCKADDR, SOCKADDR_IN, SOCKET, SOCKET_ERROR, SO_BROADCAST, WINSOCK_SHUTDOWN_HOW, WINSOCK_SOCKET_TYPE};
 use crate::socket_directory::{SocketOption};
 
 pub static PROXY_MAN: OnceLock<ProxyManager> = OnceLock::new();
@@ -235,7 +235,7 @@ impl ProxyManager {
                         return Ok(SendResult::Passthrough);
                     };
                     if let Some(from) = from {
-                        received_from.write_to_sock_addr(from);
+                        write_to_sock_addr(&received_from, from);
                     }
 
                     Ok(SendResult::SentData(written as i32))
@@ -414,7 +414,7 @@ fn accept_impl(s: SOCKET, addr: *mut SOCKADDR, addrlen: *mut i32) -> SOCKET {
         tracing::error!(?fict_socket, ?remote_addr, "Socket Accept");
         unsafe {
             let casted: *mut SOCKADDR_IN = addr.cast();
-            remote_addr.write_to_sock_addr(&mut *casted);
+            write_to_sock_addr(&remote_addr, &mut *casted);
         }
 
         fict_socket
@@ -512,6 +512,13 @@ fn socket_impl(af: i32, r#type: WINSOCK_SOCKET_TYPE, protocol: i32) -> SOCKET {
 }
 
 // MISC FUNCTIONS
+
+/// Write self to the network-byte order SOCKADDR_IN
+pub fn write_to_sock_addr(sock: &SocketAddrEncodable, addr: &mut SOCKADDR_IN) {
+    addr.sin_port = sock.port_be();
+    addr.sin_addr.S_un.S_addr = sock.ip_le_u32();
+    addr.sin_family = AF_INET;
+}
 
 fn socket_addr_to_fic(inp: &SOCKADDR_IN) -> gbe_proxy_common::SocketAddrEncodable {
     SocketAddrEncodable {
