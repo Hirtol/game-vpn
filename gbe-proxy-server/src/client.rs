@@ -1,10 +1,8 @@
-use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
+use std::sync::{Arc};
 use std::fmt::Debug;
 use std::net::Ipv4Addr;
 use quinn::{Connection, RecvStream, SendStream};
-use tokio::io::AsyncReadExt;
-use gbe_proxy_common::{bincode, C2SHeader, S2CMessage, S2CHeader, C2SMessage, SocketAddrEncodable};
+use gbe_proxy_common::{C2SHeader, S2CMessage, S2CHeader, C2SMessage};
 use gbe_proxy_common::bincode::Encode;
 
 pub struct ClientHandle {
@@ -17,7 +15,7 @@ pub struct ClientHandle {
 impl ClientHandle {
     pub async fn new(fictional_ip: Ipv4Addr, conn: Connection) -> eyre::Result<Self> {
         let (write, read) = conn.accept_bi().await?;
-
+        
         Ok(Self {
             fictional_ip,
             connection: conn,
@@ -26,19 +24,17 @@ impl ClientHandle {
         })
     }
     
-    #[tracing::instrument(skip_all, fields(self.fictional_ip))]
+    #[tracing::instrument(skip_all, fields(remote=?self.connection.remote_address(), self.fictional_ip))]
     pub async fn run(&self, clients: Arc<papaya::HashMap<Ipv4Addr, Arc<ClientHandle>>>) -> eyre::Result<()> {
-        const TO_READ: usize = std::mem::size_of::<gbe_proxy_common::C2SHeader>();
+        const TO_READ: usize = std::mem::size_of::<C2SHeader>();
         tracing::info!(fictional_ip=?self.fictional_ip, real_ip=?self.connection.remote_address(), "Starting running for client");
         let mut header_buf = vec![0; TO_READ];
         
         loop {
             let mut lock = self.read.lock().await;
-            let (header, bytes_read): (C2SHeader, usize) = gbe_proxy_common::read_message(&mut lock, &mut header_buf).await?;
+            let (header, _): (C2SHeader, usize) = gbe_proxy_common::read_message(&mut lock, &mut header_buf).await?;
             self.handle_message(header, &clients).await?;
         }
-        
-        Ok(())
     }
     
     async fn handle_message(&self, msg: C2SHeader, clients: &papaya::HashMap<Ipv4Addr, Arc<ClientHandle>>) -> eyre::Result<()> {
@@ -67,8 +63,8 @@ impl ClientHandle {
                     client.write_message(response).await?;
                 } else if to.ip().is_broadcast() {
                     tracing::debug!(?from, "Sending broadcast to all clients");
-                    for (fictive_ip, client) in &clients {
-                        // Sender also needs to receive it
+                    // Sender also needs to receive it, not just the other clients
+                    for client in clients.values() {
                         let response = S2CHeader {
                             msg_type: S2CMessage::PassBroadcast {
                                 from,

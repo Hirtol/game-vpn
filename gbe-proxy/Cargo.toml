@@ -7,7 +7,7 @@ repository = "https://github.com/Hirtol/gbe-proxy"
 license = "MIT"
 
 [features]
-default = []
+default = ["block_normal"]
 block_normal = []
 
 [dependencies]

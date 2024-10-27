@@ -5,7 +5,7 @@ use crate::{
 };
 use gbe_proxy_common::{bincode::Encode, C2SHeader, C2SMessage, Protocol, S2CHeader, S2CMessage, SocketAddrEncodable};
 use papaya::Guard;
-use quinn::{crypto::rustls::QuicClientConfig, ClientConfig, Connection, Endpoint, RecvStream, SendStream};
+use quinn::{crypto::rustls::QuicClientConfig, ClientConfig, Connection, Endpoint, RecvStream, SendStream, TransportConfig};
 use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
 use std::{
     collections::VecDeque,
@@ -13,6 +13,7 @@ use std::{
     net::{Ipv4Addr, SocketAddr},
     sync::Arc,
 };
+use std::time::Duration;
 use windows::Win32::Networking::WinSock::{htons};
 use windows_sys::Win32::Networking::WinSock::{
     AF_INET, IN_ADDR, IN_ADDR_0, IPPROTO_TCP, SOCKADDR, SOCKADDR_IN, SOCKET,
@@ -144,16 +145,23 @@ pub struct QuicClient {
 impl QuicClient {
     pub async fn new(server_addr: SocketAddr, dormant_state: Arc<DormantClientState>) -> eyre::Result<Self> {
         let mut endpoint = Endpoint::client((Ipv4Addr::from_bits(0), 0).into())?;
-
-        endpoint.set_default_client_config(ClientConfig::new(Arc::new(QuicClientConfig::try_from(
+        // Setup the QUIC client
+        let mut client_conf = ClientConfig::new(Arc::new(QuicClientConfig::try_from(
             rustls::ClientConfig::builder()
                 .dangerous()
                 .with_custom_certificate_verifier(SkipServerVerification::new())
                 .with_no_client_auth(),
-        )?)));
+        )?));
+        
+        let mut transport_conf = TransportConfig::default();
+        transport_conf.keep_alive_interval(Some(Duration::from_secs(10)));
+        client_conf.transport_config(Arc::new(transport_conf));
+        
+        endpoint.set_default_client_config(client_conf);
 
         // connect to server
         let connection = endpoint.connect(server_addr, "localhost")?.await?;
+        
         tracing::info!(addr=?connection.remote_address(), "Successfully connected");
 
         let (mut write, mut read) = connection.open_bi().await?;

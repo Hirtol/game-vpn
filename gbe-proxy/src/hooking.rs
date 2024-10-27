@@ -411,7 +411,7 @@ fn recv_impl(s: SOCKET, buf: windows_sys::core::PSTR, len: i32, flags: i32) -> i
 
 fn accept_impl(s: SOCKET, addr: *mut SOCKADDR, addrlen: *mut i32) -> SOCKET {
     if let Some((fict_socket, remote_addr)) = get_proxy_man().on_accept(s) {
-        tracing::error!(?fict_socket, ?remote_addr, "Socket Accept");
+        tracing::info!(?fict_socket, ?remote_addr, "Socket Accept");
         unsafe {
             let casted: *mut SOCKADDR_IN = addr.cast();
             write_to_sock_addr(&remote_addr, &mut *casted);
