@@ -22,6 +22,6 @@ FROM alpine:3.18.2
 
 COPY --from=fetcher /gbe-proxy-server /
 
-EXPOSE 5000
+EXPOSE 5000/udp
 
 CMD ["./gbe-proxy-server"]
