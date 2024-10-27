@@ -1,0 +1,17 @@
+[package]
+name = "gbe-proxy-version"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "gbe_proxy"
+crate-type = ['cdylib']
+
+[dependencies]
+rust_hooking_utils = { git = "https://github.com/Hirtol/rust_hooking_utils", default-features = false }
+windows = { version = "0.58.0", features = ["Win32_Foundation", "Win32_System_LibraryLoader", "Win32_Networking_WinSock"] }
+
+gbe-proxy = { path = "../gbe-proxy" }
+
+[build-dependencies]
+forward-dll = "0.1.11"

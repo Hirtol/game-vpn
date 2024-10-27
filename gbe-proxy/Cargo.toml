@@ -1,0 +1,34 @@
+[package]
+name = "gbe-proxy"
+version = "0.1.0"
+edition = "2021"
+description = "Proxy for GBE Steam Emulator to allow non-local play"
+repository = "https://github.com/Hirtol/gbe-proxy"
+license = "MIT"
+
+[features]
+default = []
+block_normal = []
+
+[dependencies]
+eyre.workspace = true
+thiserror.workspace = true
+color-eyre.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+arc-swap = "1.7.1"
+
+retour = { version = "0.4.0-alpha.2", features = ["static-detour"] }
+rust_hooking_utils = { git = "https://github.com/Hirtol/rust_hooking_utils", default-features = false, features = ["patching"] }
+windows = { version = "0.58.0", features = ["Win32_Foundation", "Win32_System_LibraryLoader", "Win32_Networking_WinSock", "Win32_System_Threading", "Win32_System_SystemServices", "Win32_System_Diagnostics_Debug", "Win32_System_Diagnostics", "Win32_System_Diagnostics_ToolHelp", "Win32_System_SystemInformation", "Win32_Devices_HumanInterfaceDevice", "Win32_System_ProcessStatus"] }
+windows-sys = { version = "0.59.0", features = ["Win32_Foundation", "Win32_System_Performance", "Win32_System_SystemInformation", "Win32_Networking_WinSock"] }
+ansi_term = "0.12.1"
+papaya = "0.1.3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+quinn.workspace = true
+rustls.workspace = true
+gbe-proxy-common.workspace = true
+tokio = { version = "1", features = ["rt", "net"] }
+

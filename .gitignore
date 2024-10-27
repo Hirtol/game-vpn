@@ -1,0 +1,8 @@
+/target
+.cargo-ok
+.DS_Store
+.idea
+
+Cargo.lock
+symbols.exe
+justfile

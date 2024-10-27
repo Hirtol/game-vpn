@@ -1,0 +1,16 @@
+[package]
+name = "gbe-proxy-common"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eyre.workspace = true
+thiserror.workspace = true
+color-eyre.workspace = true
+tracing.workspace = true
+
+quinn.workspace = true
+rustls.workspace = true
+
+bincode = "2.0.0-rc.3"
+windows-sys = { version = "0.59.0", features = ["Win32_Foundation", "Win32_System_Performance", "Win32_System_SystemInformation", "Win32_Networking_WinSock"] }
