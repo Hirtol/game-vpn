@@ -16,10 +16,6 @@ RUN bash -l -c 'case $TARGETPLATFORM in \
     "linux/arm64") \
         mv ./artifacts/aarch64-unknown-linux-gnu/gbe-proxy-server / \
         ;; \
-
-    "linux/arm/v7") \
-        mv ./artifacts/armv7-unknown-linux-gnueabihf/gbe-proxy-server / \
-        ;; \
     esac'
 
 FROM alpine:3.18.2
