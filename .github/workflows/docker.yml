@@ -58,7 +58,7 @@ jobs:
           tar -cvf gbe-proxy-server-${{ matrix.config.target }}.tar artifacts/${{ matrix.config.target }}
 
       - name: Upload backend binary artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: gbe-proxy-server-${{ matrix.config.target }}
           path: gbe-proxy-server-${{ matrix.config.target }}.tar
